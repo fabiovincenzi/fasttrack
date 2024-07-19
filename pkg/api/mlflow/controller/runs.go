@@ -2,6 +2,7 @@ package controller
 
 import (
 	"encoding/json"
+	"net/http"
 
 	"github.com/gofiber/fiber/v2"
 	log "github.com/sirupsen/logrus"
@@ -285,4 +286,52 @@ func (c Controller) LogBatch(ctx *fiber.Ctx) error {
 	}
 
 	return ctx.JSON(fiber.Map{})
+}
+
+// LogOutput handles `POST /runs/log-output` endpoint.
+func (c Controller) LogOutput(ctx *fiber.Ctx) error {
+	var req request.LogOutputRequest
+	if err := ctx.BodyParser(&req); err != nil {
+		if err, ok := err.(*json.UnmarshalTypeError); ok {
+			return api.NewInvalidParameterValueError(
+				`Invalid value for log output field '%s'. Hint: Value was of type '%s'. `+
+					`See the API docs for more information about request parameters.`,
+				err.Field, err.Value,
+			)
+		}
+		return api.NewBadRequestError("Unable to decode request body: %s", err)
+	}
+	log.Debugf("LogOutput request: %#v", req)
+
+	ns, err := middleware.GetNamespaceFromContext(ctx.Context())
+	if err != nil {
+		return api.NewInternalError("error getting namespace from context")
+	}
+	log.Debugf("LogOutput namespace: %s", ns.Code)
+
+	if err := c.runService.LogOutput(ctx.Context(), ns, &req); err != nil {
+		return err
+	}
+
+	return ctx.JSON(fiber.Map{})
+}
+
+// LogArtifact handles `POST /runs/log-artifact` endpoint.
+func (c Controller) LogArtifact(ctx *fiber.Ctx) error {
+	ns, err := middleware.GetNamespaceFromContext(ctx.Context())
+	if err != nil {
+		return api.NewInternalError("error getting namespace from context")
+	}
+	log.Debugf("LogArtifact namespace: %s", ns.Code)
+
+	req := request.LogArtifactRequest{}
+	if err := ctx.BodyParser(&req); err != nil {
+		return fiber.NewError(fiber.StatusUnprocessableEntity, err.Error())
+	}
+
+	if err := c.runService.LogArtifact(ctx.Context(), ns.ID, &req); err != nil {
+		return err
+	}
+
+	return ctx.SendStatus(http.StatusCreated)
 }

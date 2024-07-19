@@ -64,16 +64,16 @@ type server struct {
 
 // NewServer creates a new server instance.
 func NewServer(ctx context.Context, config *config.Config) (Server, error) {
-	// create artifact storage factory.
-	artifactStorageFactory, err := storage.NewArtifactStorageFactory(config)
-	if err != nil {
-		return nil, eris.Wrap(err, "error creating artifact storage factory")
-	}
-
 	// create database provider.
 	db, err := createDBProvider(ctx, config)
 	if err != nil {
 		return nil, err
+	}
+
+	// create artifact storage factory.
+	artifactStorageFactory, err := storage.NewArtifactStorageFactory(config)
+	if err != nil {
+		return nil, eris.Wrap(err, "error creating artifact storage factory")
 	}
 
 	// create fiber app.
@@ -271,15 +271,18 @@ func createApp(
 	aimAPI.NewRouter(
 		aimController.NewController(
 			aimTagService.NewService(
-				aimRepositories.NewTagRepository(db.GormDB()),
+				aimRepositories.NewSharedTagRepository(db.GormDB()),
 			),
 			aimAppService.NewService(
 				aimRepositories.NewAppRepository(db.GormDB()),
 			),
 			aimRunService.NewService(
 				aimRepositories.NewRunRepository(db.GormDB()),
+				aimRepositories.NewLogRepository(db.GormDB()),
 				aimRepositories.NewMetricRepository(db.GormDB()),
 				aimRepositories.NewTagRepository(db.GormDB()),
+				aimRepositories.NewSharedTagRepository(db.GormDB()),
+				aimRepositories.NewArtifactRepository(db.GormDB()),
 			),
 			aimProjectService.NewService(
 				aimRepositories.NewTagRepository(db.GormDB()),
@@ -310,6 +313,8 @@ func createApp(
 				mlflowRepositories.NewParamRepository(db.GormDB()),
 				mlflowRepositories.NewMetricRepository(db.GormDB()),
 				mlflowRepositories.NewExperimentRepository(db.GormDB()),
+				mlflowRepositories.NewLogRepository(db.GormDB(), config.RunLogOutputMax),
+				mlflowRepositories.NewArtifactRepository(db.GormDB()),
 			),
 			mlflowModelService.NewService(),
 			mlflowMetricService.NewService(
@@ -327,6 +332,13 @@ func createApp(
 			),
 		),
 	).Init(app)
+
+	// run a log cleaner background job.
+	mlflowRunService.NewLogCleaner(
+		ctx,
+		config,
+		mlflowRepositories.NewLogRepository(db.GormDB(), config.RunLogOutputMax),
+	).Run()
 
 	mlflowUI.AddRoutes(app)
 	aimUI.AddRoutes(app)

@@ -1,4 +1,6 @@
 import json
+import os
+import posixpath
 import threading
 from typing import Dict, Optional, Sequence
 
@@ -251,3 +253,68 @@ class CustomRestStore(RestStore):
 
         with pa.ipc.open_stream(result.raw) as reader:
             return reader.read_pandas().set_index(["run_id", "key", index])
+
+    def log_output(self, run_id, data):
+        request_body = {
+            "run_id": run_id,
+            "data": data,
+        }
+
+        result = http_request(
+            **{
+                "host_creds": self.get_host_creds(),
+                "endpoint": "/api/2.0/mlflow/runs/log-output",
+                "method": "POST",
+                "json": request_body,
+            }
+        )
+        if result.status_code != 200:
+            result = result.json()
+        if "error_code" in result:
+            raise MlflowException(
+                message=result["message"],
+                error_code=result["error_code"],
+            )
+        return result
+
+    def log_image(
+        self,
+        run_id: str,
+        filename: str,
+        artifact_path: str,
+        caption: str,
+        index: int,
+        width: int,
+        height: int,
+        format: str,
+        step: int,
+        iter: int,
+    ):
+        storage_path = posixpath.join(artifact_path, os.path.basename(filename))
+        request_body = {
+            "run_id": run_id,
+            "blob_uri": storage_path,
+            "caption": caption,
+            "index": index,
+            "width": width,
+            "height": height,
+            "format": format,
+            "step": step,
+            "iter": iter,
+        }
+        result = http_request(
+            **{
+                "host_creds": self.get_host_creds(),
+                "endpoint": "/api/2.0/mlflow/runs/log-artifact",
+                "method": "POST",
+                "json": request_body,
+            }
+        )
+        if result.status_code != 201:
+            result = result.json()
+        if "error_code" in result:
+            raise MlflowException(
+                message=result["message"],
+                error_code=result["error_code"],
+            )
+        return result

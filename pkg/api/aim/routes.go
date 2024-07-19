@@ -12,7 +12,7 @@ type Router struct {
 	globalMiddlewares []fiber.Handler
 }
 
-// NewRouter creates new instance of `aim` router.
+// NewRouter creates a new instance of `aim` router.
 func NewRouter(controller *controller.Controller) *Router {
 	return &Router{
 		controller:        controller,
@@ -64,15 +64,24 @@ func (r *Router) Init(server fiber.Router) {
 	runs.Get("/search/run/", r.controller.SearchRuns)
 	runs.Post("/search/metric/", r.controller.SearchMetrics)
 	runs.Post("/search/metric/align/", r.controller.SearchAlignedMetrics)
+	runs.Post("/search/image/", r.controller.SearchImages)
 	runs.Get("/:id/info/", r.controller.GetRunInfo)
+	runs.Post("/:id/tags/new", r.controller.AddRunTag)
+	runs.Delete("/:id/tags/:tagID", r.controller.DeleteRunTag)
 	runs.Post("/:id/metric/get-batch/", r.controller.GetRunMetrics)
 	runs.Put("/:id/", r.controller.UpdateRun)
+	runs.Get("/:id/logs", r.controller.GetRunLogs)
 	runs.Delete("/:id/", r.controller.DeleteRun)
 	runs.Post("/delete-batch/", r.controller.DeleteBatch)
 	runs.Post("/archive-batch/", r.controller.ArchiveBatch)
 
 	tags := mainGroup.Group("/tags")
 	tags.Get("/", r.controller.GetTags)
+	tags.Get("/:id/", r.controller.GetTag)
+	tags.Post("/", r.controller.CreateTag)
+	tags.Put("/:id/", r.controller.UpdateTag)
+	tags.Delete("/:id/", r.controller.DeleteTag)
+	tags.Get("/:id/runs", r.controller.GetRunsTagged)
 
 	mainGroup.Use(func(c *fiber.Ctx) error {
 		return fiber.ErrNotFound

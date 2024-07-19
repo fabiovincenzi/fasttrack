@@ -54,6 +54,8 @@ const (
 	RunsLogBatchRoute     = "/log-batch"
 	RunsLogMetricRoute    = "/log-metric"
 	RunsLogParameterRoute = "/log-parameter"
+	RunsLogOutputRoute    = "/log-output"
+	RunsLogArtifactRoute  = "/log-artifact"
 )
 
 // Router represents `mlflow` router.
@@ -118,6 +120,8 @@ func (r *Router) Init(router fiber.Router) {
 		runs.Post(RunsSearchRoute, r.controller.SearchRuns)
 		runs.Post(RunsSetTagRoute, r.controller.SetRunTag)
 		runs.Post(RunsUpdateRoute, r.controller.UpdateRun)
+		runs.Post(RunsLogOutputRoute, r.controller.LogOutput)
+		runs.Post(RunsLogArtifactRoute, r.controller.LogArtifact)
 
 		mainGroup.Get("/model-versions/search", r.controller.SearchModelVersions)
 		mainGroup.Get("/registered-models/search", r.controller.SearchRegisteredModels)

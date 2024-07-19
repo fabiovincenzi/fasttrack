@@ -1,6 +1,8 @@
 package request
 
-import "github.com/gofiber/fiber/v2"
+import (
+	"github.com/gofiber/fiber/v2"
+)
 
 // BaseSearchRequest defines some shared fields for search requestes.
 type BaseSearchRequest struct {
@@ -35,6 +37,11 @@ type UpdateRunRequest struct {
 	Status      *string `json:"status"`
 	EndTime     *int64  `json:"end_time"`
 	Archived    *bool   `json:"archived"`
+}
+
+// GetRunLogsRequest is a request struct for `GET /runs/:id/logs` endpoint.
+type GetRunLogsRequest struct {
+	ID string `params:"id"`
 }
 
 // SearchRunsRequest is a request object for `GET /runs/search/run` endpoint.
@@ -79,6 +86,18 @@ type SearchAlignedMetricsRequest struct {
 	AlignBy string `json:"align_by"`
 }
 
+// SearchArtifactsRequest is a request struct for `GET /runs/search/image` endpoint.
+type SearchArtifactsRequest struct {
+	BaseSearchRequest
+	Query         string `query:"q"`
+	SkipSystem    bool   `query:"skip_system"`
+	RecordDensity int    `query:"record_density"`
+	IndexDensity  int    `query:"index_density"`
+	RecordRange   string `query:"record_range"`
+	IndexRange    string `query:"index_range"`
+	CalcRanges    bool   `query:"calc_ranges"`
+}
+
 // DeleteRunRequest is a request struct for `DELETE /runs/:id` endpoint.
 type DeleteRunRequest struct {
 	ID string `params:"id"`
@@ -89,3 +108,15 @@ type ArchiveBatchRequest []string
 
 // DeleteBatchRequest is a request struct for `DELETE /runs/delete-batch` endpoint.
 type DeleteBatchRequest []string
+
+// AddRunTagRequest is a request for `POST /runs/:id/tags/new` endpoint.
+type AddRunTagRequest struct {
+	RunID   string `params:"id"`
+	TagName string `json:"tag_name"`
+}
+
+// DeleteRunTagRequest is a request for `DELETE /runs/:id/tags/:tagID` endpoint.
+type DeleteRunTagRequest struct {
+	RunID string `params:"id"`
+	TagID string `params:"tagID"`
+}

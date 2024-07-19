@@ -185,6 +185,37 @@ func (c Controller) SearchAlignedMetrics(ctx *fiber.Ctx) error {
 	return nil
 }
 
+// SearchMetrics handles `POST /runs/search/image` endpoint.
+func (c Controller) SearchImages(ctx *fiber.Ctx) error {
+	ns, err := middleware.GetNamespaceFromContext(ctx.Context())
+	if err != nil {
+		return api.NewInternalError("error getting namespace from context")
+	}
+	log.Debugf("searchMetrics namespace: %s", ns.Code)
+
+	req := request.SearchArtifactsRequest{}
+	if err = ctx.QueryParser(&req); err != nil {
+		return fiber.NewError(fiber.StatusUnprocessableEntity, err.Error())
+	}
+	if ctx.Query("report_progress") == "" {
+		req.ReportProgress = true
+	}
+
+	tzOffset, err := strconv.Atoi(ctx.Get("x-timezone-offset", "0"))
+	if err != nil {
+		return fiber.NewError(fiber.StatusUnprocessableEntity, "x-timezone-offset header is not a valid integer")
+	}
+
+	//nolint:rowserrcheck
+	rows, totalRuns, result, err := c.runService.SearchArtifacts(ctx.Context(), ns.ID, tzOffset, req)
+	if err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+	}
+
+	response.NewStreamArtifactsResponse(ctx, rows, totalRuns, result, req)
+	return nil
+}
+
 // DeleteRun handles `DELETE /runs/:id` endpoint.
 func (c Controller) DeleteRun(ctx *fiber.Ctx) error {
 	ns, err := middleware.GetNamespaceFromContext(ctx.Context())
@@ -227,6 +258,29 @@ func (c Controller) UpdateRun(ctx *fiber.Ctx) error {
 	}
 
 	return ctx.JSON(response.NewUpdateRunResponse(req.ID, "OK"))
+}
+
+// GetRunLogs handles `GET /runs/:id/logs` endpoint.
+func (c Controller) GetRunLogs(ctx *fiber.Ctx) error {
+	ns, err := middleware.GetNamespaceFromContext(ctx.Context())
+	if err != nil {
+		return api.NewInternalError("error getting namespace from context")
+	}
+	log.Debugf("GetRunLogs namespace: %s", ns.Code)
+
+	req := request.GetRunLogsRequest{}
+	if err = ctx.ParamsParser(&req); err != nil {
+		return fiber.NewError(fiber.StatusUnprocessableEntity, err.Error())
+	}
+
+	//nolint:rowserrcheck
+	rows, next, err := c.runService.GetRunLogs(ctx.Context(), ns.ID, &req)
+	if err != nil {
+		return err
+	}
+
+	response.NewGetRunLogsResponse(ctx, rows, next)
+	return nil
 }
 
 // ArchiveBatch handles `POST /runs/archive-batch` endpoint.
@@ -272,4 +326,47 @@ func (c Controller) DeleteBatch(ctx *fiber.Ctx) error {
 	}
 
 	return ctx.JSON(response.NewArchiveBatchResponse("OK"))
+}
+
+// AddRunTag handles `POST /runs/:id/tags/new` endpoint.
+func (c Controller) AddRunTag(ctx *fiber.Ctx) error {
+	ns, err := middleware.GetNamespaceFromContext(ctx.Context())
+	if err != nil {
+		return api.NewInternalError("error getting namespace from context")
+	}
+	log.Debugf("addRunTag namespace: %s", ns.Code)
+
+	req := request.AddRunTagRequest{}
+	if err = ctx.ParamsParser(&req); err != nil {
+		return fiber.NewError(fiber.StatusUnprocessableEntity, err.Error())
+	}
+	if err = ctx.BodyParser(&req); err != nil {
+		return fiber.NewError(fiber.StatusUnprocessableEntity, err.Error())
+	}
+
+	if err := c.runService.AddRunTag(ctx.Context(), ns.ID, &req); err != nil {
+		return err
+	}
+
+	return ctx.SendStatus(fiber.StatusCreated)
+}
+
+// AddRunTag handles `DELETE /runs/:id/tags/:tagID` endpoint.
+func (c Controller) DeleteRunTag(ctx *fiber.Ctx) error {
+	ns, err := middleware.GetNamespaceFromContext(ctx.Context())
+	if err != nil {
+		return api.NewInternalError("error getting namespace from context")
+	}
+	log.Debugf("deleteRunTag namespace: %s", ns.Code)
+
+	req := request.DeleteRunTagRequest{}
+	if err = ctx.ParamsParser(&req); err != nil {
+		return fiber.NewError(fiber.StatusUnprocessableEntity, err.Error())
+	}
+
+	if err := c.runService.DeleteRunTag(ctx.Context(), ns.ID, &req); err != nil {
+		return err
+	}
+
+	return ctx.SendStatus(fiber.StatusOK)
 }

@@ -67,6 +67,8 @@ func TestService_CreateRun_Ok(t *testing.T) {
 		&repositories.MockParamRepositoryProvider{},
 		&repositories.MockMetricRepositoryProvider{},
 		&experimentRepository,
+		&repositories.MockLogRepositoryProvider{},
+		&repositories.MockArtifactRepositoryProvider{},
 	)
 	run, err := service.CreateRun(context.TODO(), &ns, &request.CreateRunRequest{
 		ExperimentID: "0", // default experiment id provided by the client is "0"
@@ -122,6 +124,8 @@ func TestService_CreateRun_Error(t *testing.T) {
 					&repositories.MockParamRepositoryProvider{},
 					&repositories.MockMetricRepositoryProvider{},
 					&repositories.MockExperimentRepositoryProvider{},
+					&repositories.MockLogRepositoryProvider{},
+					&repositories.MockArtifactRepositoryProvider{},
 				)
 			},
 		},
@@ -145,6 +149,8 @@ func TestService_CreateRun_Error(t *testing.T) {
 					&repositories.MockParamRepositoryProvider{},
 					&repositories.MockMetricRepositoryProvider{},
 					&experimentRepository,
+					&repositories.MockLogRepositoryProvider{},
+					&repositories.MockArtifactRepositoryProvider{},
 				)
 			},
 		},
@@ -197,6 +203,8 @@ func TestService_CreateRun_Error(t *testing.T) {
 					&repositories.MockParamRepositoryProvider{},
 					&repositories.MockMetricRepositoryProvider{},
 					&experimentRepository,
+					&repositories.MockLogRepositoryProvider{},
+					&repositories.MockArtifactRepositoryProvider{},
 				)
 			},
 		},
@@ -233,6 +241,8 @@ func TestService_UpdateRun_Error(t *testing.T) {
 					&repositories.MockParamRepositoryProvider{},
 					&repositories.MockMetricRepositoryProvider{},
 					&repositories.MockExperimentRepositoryProvider{},
+					&repositories.MockLogRepositoryProvider{},
+					&repositories.MockArtifactRepositoryProvider{},
 				)
 			},
 		},
@@ -256,6 +266,8 @@ func TestService_UpdateRun_Error(t *testing.T) {
 					&repositories.MockParamRepositoryProvider{},
 					&repositories.MockMetricRepositoryProvider{},
 					&repositories.MockExperimentRepositoryProvider{},
+					&repositories.MockLogRepositoryProvider{},
+					&repositories.MockArtifactRepositoryProvider{},
 				)
 			},
 		},
@@ -296,6 +308,8 @@ func TestService_RestoreRun_Ok(t *testing.T) {
 		&repositories.MockParamRepositoryProvider{},
 		&repositories.MockMetricRepositoryProvider{},
 		&repositories.MockExperimentRepositoryProvider{},
+		&repositories.MockLogRepositoryProvider{},
+		&repositories.MockArtifactRepositoryProvider{},
 	)
 	err := service.RestoreRun(context.TODO(), &models.Namespace{ID: 1}, &request.RestoreRunRequest{RunID: "1"})
 
@@ -321,6 +335,8 @@ func TestService_RestoreRun_Error(t *testing.T) {
 					&repositories.MockParamRepositoryProvider{},
 					&repositories.MockMetricRepositoryProvider{},
 					&repositories.MockExperimentRepositoryProvider{},
+					&repositories.MockLogRepositoryProvider{},
+					&repositories.MockArtifactRepositoryProvider{},
 				)
 			},
 		},
@@ -344,6 +360,8 @@ func TestService_RestoreRun_Error(t *testing.T) {
 					&repositories.MockParamRepositoryProvider{},
 					&repositories.MockMetricRepositoryProvider{},
 					&repositories.MockExperimentRepositoryProvider{},
+					&repositories.MockLogRepositoryProvider{},
+					&repositories.MockArtifactRepositoryProvider{},
 				)
 			},
 		},
@@ -379,6 +397,8 @@ func TestService_RestoreRun_Error(t *testing.T) {
 					&repositories.MockParamRepositoryProvider{},
 					&repositories.MockMetricRepositoryProvider{},
 					&repositories.MockExperimentRepositoryProvider{},
+					&repositories.MockLogRepositoryProvider{},
+					&repositories.MockArtifactRepositoryProvider{},
 				)
 			},
 		},
@@ -420,6 +440,8 @@ func TestService_SetRunTag_Ok(t *testing.T) {
 		&repositories.MockParamRepositoryProvider{},
 		&repositories.MockMetricRepositoryProvider{},
 		&repositories.MockExperimentRepositoryProvider{},
+		&repositories.MockLogRepositoryProvider{},
+		&repositories.MockArtifactRepositoryProvider{},
 	)
 	err := service.SetRunTag(context.TODO(), &models.Namespace{
 		ID: 1,
@@ -456,6 +478,8 @@ func TestService_DeleteRun_Ok(t *testing.T) {
 		&repositories.MockParamRepositoryProvider{},
 		&repositories.MockMetricRepositoryProvider{},
 		&repositories.MockExperimentRepositoryProvider{},
+		&repositories.MockLogRepositoryProvider{},
+		&repositories.MockArtifactRepositoryProvider{},
 	)
 	err := service.DeleteRun(context.TODO(), &models.Namespace{ID: 1}, &request.DeleteRunRequest{RunID: "1"})
 
@@ -481,6 +505,8 @@ func TestService_DeleteRun_Error(t *testing.T) {
 					&repositories.MockParamRepositoryProvider{},
 					&repositories.MockMetricRepositoryProvider{},
 					&repositories.MockExperimentRepositoryProvider{},
+					&repositories.MockLogRepositoryProvider{},
+					&repositories.MockArtifactRepositoryProvider{},
 				)
 			},
 		},
@@ -504,6 +530,8 @@ func TestService_DeleteRun_Error(t *testing.T) {
 					&repositories.MockParamRepositoryProvider{},
 					&repositories.MockMetricRepositoryProvider{},
 					&repositories.MockExperimentRepositoryProvider{},
+					&repositories.MockLogRepositoryProvider{},
+					&repositories.MockArtifactRepositoryProvider{},
 				)
 			},
 		},
@@ -527,6 +555,8 @@ func TestService_DeleteRun_Error(t *testing.T) {
 					&repositories.MockParamRepositoryProvider{},
 					&repositories.MockMetricRepositoryProvider{},
 					&repositories.MockExperimentRepositoryProvider{},
+					&repositories.MockLogRepositoryProvider{},
+					&repositories.MockArtifactRepositoryProvider{},
 				)
 			},
 		},
@@ -560,6 +590,8 @@ func TestService_DeleteRun_Error(t *testing.T) {
 					&repositories.MockParamRepositoryProvider{},
 					&repositories.MockMetricRepositoryProvider{},
 					&repositories.MockExperimentRepositoryProvider{},
+					&repositories.MockLogRepositoryProvider{},
+					&repositories.MockArtifactRepositoryProvider{},
 				)
 			},
 		},
@@ -595,6 +627,8 @@ func TestService_DeleteRunTag_Error(t *testing.T) {
 					&repositories.MockParamRepositoryProvider{},
 					&repositories.MockMetricRepositoryProvider{},
 					&repositories.MockExperimentRepositoryProvider{},
+					&repositories.MockLogRepositoryProvider{},
+					&repositories.MockArtifactRepositoryProvider{},
 				)
 			},
 		},
@@ -619,6 +653,8 @@ func TestService_DeleteRunTag_Error(t *testing.T) {
 					&repositories.MockParamRepositoryProvider{},
 					&repositories.MockMetricRepositoryProvider{},
 					&repositories.MockExperimentRepositoryProvider{},
+					&repositories.MockLogRepositoryProvider{},
+					&repositories.MockArtifactRepositoryProvider{},
 				)
 			},
 		},
@@ -643,6 +679,8 @@ func TestService_DeleteRunTag_Error(t *testing.T) {
 					&repositories.MockParamRepositoryProvider{},
 					&repositories.MockMetricRepositoryProvider{},
 					&repositories.MockExperimentRepositoryProvider{},
+					&repositories.MockLogRepositoryProvider{},
+					&repositories.MockArtifactRepositoryProvider{},
 				)
 			},
 		},
@@ -678,6 +716,8 @@ func TestService_DeleteRunTag_Error(t *testing.T) {
 					&repositories.MockParamRepositoryProvider{},
 					&repositories.MockMetricRepositoryProvider{},
 					&repositories.MockExperimentRepositoryProvider{},
+					&repositories.MockLogRepositoryProvider{},
+					&repositories.MockArtifactRepositoryProvider{},
 				)
 			},
 		},
@@ -713,6 +753,8 @@ func TestService_DeleteRunTag_Error(t *testing.T) {
 					&repositories.MockParamRepositoryProvider{},
 					&repositories.MockMetricRepositoryProvider{},
 					&repositories.MockExperimentRepositoryProvider{},
+					&repositories.MockLogRepositoryProvider{},
+					&repositories.MockArtifactRepositoryProvider{},
 				)
 			},
 		},
@@ -762,6 +804,8 @@ func TestService_DeleteRunTag_Error(t *testing.T) {
 					&repositories.MockParamRepositoryProvider{},
 					&repositories.MockMetricRepositoryProvider{},
 					&repositories.MockExperimentRepositoryProvider{},
+					&repositories.MockLogRepositoryProvider{},
+					&repositories.MockArtifactRepositoryProvider{},
 				)
 			},
 		},
@@ -828,6 +872,8 @@ func TestService_GetRun_Ok(t *testing.T) {
 		&repositories.MockParamRepositoryProvider{},
 		&repositories.MockMetricRepositoryProvider{},
 		&repositories.MockExperimentRepositoryProvider{},
+		&repositories.MockLogRepositoryProvider{},
+		&repositories.MockArtifactRepositoryProvider{},
 	)
 	run, err := service.GetRun(context.TODO(), &models.Namespace{
 		ID: 1,
@@ -889,6 +935,8 @@ func TestService_GetRun_Error(t *testing.T) {
 					&repositories.MockParamRepositoryProvider{},
 					&repositories.MockMetricRepositoryProvider{},
 					&repositories.MockExperimentRepositoryProvider{},
+					&repositories.MockLogRepositoryProvider{},
+					&repositories.MockArtifactRepositoryProvider{},
 				)
 			},
 		},
@@ -912,6 +960,8 @@ func TestService_GetRun_Error(t *testing.T) {
 					&repositories.MockParamRepositoryProvider{},
 					&repositories.MockMetricRepositoryProvider{},
 					&repositories.MockExperimentRepositoryProvider{},
+					&repositories.MockLogRepositoryProvider{},
+					&repositories.MockArtifactRepositoryProvider{},
 				)
 			},
 		},
@@ -988,6 +1038,8 @@ func TestService_LogBatch_Ok(t *testing.T) {
 		&paramRepository,
 		&metricRepository,
 		&repositories.MockExperimentRepositoryProvider{},
+		&repositories.MockLogRepositoryProvider{},
+		&repositories.MockArtifactRepositoryProvider{},
 	)
 	err := service.LogBatch(context.TODO(), &models.Namespace{
 		ID: 1,
@@ -1037,6 +1089,8 @@ func TestService_LogBatch_Error(t *testing.T) {
 					&repositories.MockParamRepositoryProvider{},
 					&repositories.MockMetricRepositoryProvider{},
 					&repositories.MockExperimentRepositoryProvider{},
+					&repositories.MockLogRepositoryProvider{},
+					&repositories.MockArtifactRepositoryProvider{},
 				)
 			},
 		},
@@ -1061,6 +1115,8 @@ func TestService_LogBatch_Error(t *testing.T) {
 					&repositories.MockParamRepositoryProvider{},
 					&repositories.MockMetricRepositoryProvider{},
 					&repositories.MockExperimentRepositoryProvider{},
+					&repositories.MockLogRepositoryProvider{},
+					&repositories.MockArtifactRepositoryProvider{},
 				)
 			},
 		},
@@ -1085,6 +1141,8 @@ func TestService_LogBatch_Error(t *testing.T) {
 					&repositories.MockParamRepositoryProvider{},
 					&repositories.MockMetricRepositoryProvider{},
 					&repositories.MockExperimentRepositoryProvider{},
+					&repositories.MockLogRepositoryProvider{},
+					&repositories.MockArtifactRepositoryProvider{},
 				)
 			},
 		},
@@ -1109,6 +1167,8 @@ func TestService_LogBatch_Error(t *testing.T) {
 					&repositories.MockParamRepositoryProvider{},
 					&repositories.MockMetricRepositoryProvider{},
 					&repositories.MockExperimentRepositoryProvider{},
+					&repositories.MockLogRepositoryProvider{},
+					&repositories.MockArtifactRepositoryProvider{},
 				)
 			},
 		},
@@ -1142,6 +1202,8 @@ func TestService_LogBatch_Error(t *testing.T) {
 					&repositories.MockParamRepositoryProvider{},
 					&repositories.MockMetricRepositoryProvider{},
 					&repositories.MockExperimentRepositoryProvider{},
+					&repositories.MockLogRepositoryProvider{},
+					&repositories.MockArtifactRepositoryProvider{},
 				)
 			},
 		},
@@ -1187,6 +1249,8 @@ func TestService_LogBatch_Error(t *testing.T) {
 					&paramRepository,
 					&repositories.MockMetricRepositoryProvider{},
 					&repositories.MockExperimentRepositoryProvider{},
+					&repositories.MockLogRepositoryProvider{},
+					&repositories.MockArtifactRepositoryProvider{},
 				)
 			},
 		},
@@ -1232,6 +1296,8 @@ func TestService_LogBatch_Error(t *testing.T) {
 					&paramRepository,
 					&repositories.MockMetricRepositoryProvider{},
 					&repositories.MockExperimentRepositoryProvider{},
+					&repositories.MockLogRepositoryProvider{},
+					&repositories.MockArtifactRepositoryProvider{},
 				)
 			},
 		},
@@ -1307,6 +1373,8 @@ func TestService_LogBatch_Error(t *testing.T) {
 					&paramRepository,
 					&metricRepository,
 					&repositories.MockExperimentRepositoryProvider{},
+					&repositories.MockLogRepositoryProvider{},
+					&repositories.MockArtifactRepositoryProvider{},
 				)
 			},
 		},
@@ -1404,6 +1472,8 @@ func TestService_LogBatch_Error(t *testing.T) {
 					&paramRepository,
 					&metricRepository,
 					&repositories.MockExperimentRepositoryProvider{},
+					&repositories.MockLogRepositoryProvider{},
+					&repositories.MockArtifactRepositoryProvider{},
 				)
 			},
 		},
@@ -1453,6 +1523,8 @@ func TestService_LogMetric_Ok(t *testing.T) {
 		&repositories.MockParamRepositoryProvider{},
 		&metricRepository,
 		&repositories.MockExperimentRepositoryProvider{},
+		&repositories.MockLogRepositoryProvider{},
+		&repositories.MockArtifactRepositoryProvider{},
 	)
 	err := service.LogMetric(context.TODO(), &models.Namespace{
 		ID: 1,
@@ -1486,6 +1558,8 @@ func TestService_LogMetric_Error(t *testing.T) {
 					&repositories.MockParamRepositoryProvider{},
 					&repositories.MockMetricRepositoryProvider{},
 					&repositories.MockExperimentRepositoryProvider{},
+					&repositories.MockLogRepositoryProvider{},
+					&repositories.MockArtifactRepositoryProvider{},
 				)
 			},
 		},
@@ -1502,6 +1576,8 @@ func TestService_LogMetric_Error(t *testing.T) {
 					&repositories.MockParamRepositoryProvider{},
 					&repositories.MockMetricRepositoryProvider{},
 					&repositories.MockExperimentRepositoryProvider{},
+					&repositories.MockLogRepositoryProvider{},
+					&repositories.MockArtifactRepositoryProvider{},
 				)
 			},
 		},
@@ -1519,6 +1595,8 @@ func TestService_LogMetric_Error(t *testing.T) {
 					&repositories.MockParamRepositoryProvider{},
 					&repositories.MockMetricRepositoryProvider{},
 					&repositories.MockExperimentRepositoryProvider{},
+					&repositories.MockLogRepositoryProvider{},
+					&repositories.MockArtifactRepositoryProvider{},
 				)
 			},
 		},
@@ -1545,6 +1623,8 @@ func TestService_LogMetric_Error(t *testing.T) {
 					&repositories.MockParamRepositoryProvider{},
 					&repositories.MockMetricRepositoryProvider{},
 					&repositories.MockExperimentRepositoryProvider{},
+					&repositories.MockLogRepositoryProvider{},
+					&repositories.MockArtifactRepositoryProvider{},
 				)
 			},
 		},
@@ -1573,6 +1653,8 @@ func TestService_LogMetric_Error(t *testing.T) {
 					&repositories.MockParamRepositoryProvider{},
 					&repositories.MockMetricRepositoryProvider{},
 					&repositories.MockExperimentRepositoryProvider{},
+					&repositories.MockLogRepositoryProvider{},
+					&repositories.MockArtifactRepositoryProvider{},
 				)
 			},
 		},
@@ -1621,6 +1703,8 @@ func TestService_LogMetric_Error(t *testing.T) {
 					&repositories.MockParamRepositoryProvider{},
 					&metricRepository,
 					&repositories.MockExperimentRepositoryProvider{},
+					&repositories.MockLogRepositoryProvider{},
+					&repositories.MockArtifactRepositoryProvider{},
 				)
 			},
 		},
@@ -1668,6 +1752,8 @@ func TestService_LogParam_Ok(t *testing.T) {
 		&paramRepository,
 		&repositories.MockMetricRepositoryProvider{},
 		&repositories.MockExperimentRepositoryProvider{},
+		&repositories.MockLogRepositoryProvider{},
+		&repositories.MockArtifactRepositoryProvider{},
 	)
 	err := service.LogParam(context.TODO(), &models.Namespace{
 		ID: 1,
@@ -1699,6 +1785,8 @@ func TestService_LogParam_Error(t *testing.T) {
 					&repositories.MockParamRepositoryProvider{},
 					&repositories.MockMetricRepositoryProvider{},
 					&repositories.MockExperimentRepositoryProvider{},
+					&repositories.MockLogRepositoryProvider{},
+					&repositories.MockArtifactRepositoryProvider{},
 				)
 			},
 		},
@@ -1715,6 +1803,8 @@ func TestService_LogParam_Error(t *testing.T) {
 					&repositories.MockParamRepositoryProvider{},
 					&repositories.MockMetricRepositoryProvider{},
 					&repositories.MockExperimentRepositoryProvider{},
+					&repositories.MockLogRepositoryProvider{},
+					&repositories.MockArtifactRepositoryProvider{},
 				)
 			},
 		},
@@ -1741,6 +1831,8 @@ func TestService_LogParam_Error(t *testing.T) {
 					&repositories.MockParamRepositoryProvider{},
 					&repositories.MockMetricRepositoryProvider{},
 					&repositories.MockExperimentRepositoryProvider{},
+					&repositories.MockLogRepositoryProvider{},
+					&repositories.MockArtifactRepositoryProvider{},
 				)
 			},
 		},
@@ -1767,6 +1859,8 @@ func TestService_LogParam_Error(t *testing.T) {
 					&repositories.MockParamRepositoryProvider{},
 					&repositories.MockMetricRepositoryProvider{},
 					&repositories.MockExperimentRepositoryProvider{},
+					&repositories.MockLogRepositoryProvider{},
+					&repositories.MockArtifactRepositoryProvider{},
 				)
 			},
 		},
@@ -1809,6 +1903,8 @@ func TestService_LogParam_Error(t *testing.T) {
 					&paramRepository,
 					&repositories.MockMetricRepositoryProvider{},
 					&repositories.MockExperimentRepositoryProvider{},
+					&repositories.MockLogRepositoryProvider{},
+					&repositories.MockArtifactRepositoryProvider{},
 				)
 			},
 		},
@@ -1851,6 +1947,8 @@ func TestService_LogParam_Error(t *testing.T) {
 					&paramRepository,
 					&repositories.MockMetricRepositoryProvider{},
 					&repositories.MockExperimentRepositoryProvider{},
+					&repositories.MockLogRepositoryProvider{},
+					&repositories.MockArtifactRepositoryProvider{},
 				)
 			},
 		},

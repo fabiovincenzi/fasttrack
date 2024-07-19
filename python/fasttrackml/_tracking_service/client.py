@@ -137,3 +137,28 @@ class FasttrackmlTrackingServiceClient(TrackingServiceClient):
         """Yield successive chunks from input_list."""
         for i in range(0, len(input_list), chunk_size):
             yield input_list[i : i + chunk_size]
+
+    def log_output(
+        self,
+        run_id: str,
+        data: str,
+    ):
+        self.custom_store.log_output(run_id, data)
+
+    def log_image(
+        self,
+        run_id: str,
+        filename: str,
+        artifact_path: str,
+        caption: str,
+        index: int,
+        width: int,
+        height: int,
+        format: str,
+        step: int,
+        iter: int,
+    ):
+        # 1. log the artifact
+        self.log_artifact(run_id, filename, artifact_path)
+        # 2. log the image metadata
+        self.custom_store.log_image(run_id, filename, artifact_path, caption, index, width, height, format, step, iter)

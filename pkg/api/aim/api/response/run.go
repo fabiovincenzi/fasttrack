@@ -54,10 +54,12 @@ type GetRunInfoExperimentPartial struct {
 
 // GetRunInfoPropsPartial is a partial response object for GetRunInfoResponse.
 type GetRunInfoPropsPartial struct {
+	ID           string                      `json:"id,omitempty"`
+	RunID        string                      `json:"run_id,omitempty"`
 	Name         string                      `json:"name"`
 	Description  string                      `json:"description"`
 	Experiment   GetRunInfoExperimentPartial `json:"experiment"`
-	Tags         []string                    `json:"tags"`
+	Tags         []map[string]string         `json:"tags"`
 	CreationTime float64                     `json:"creation_time"`
 	EndTime      float64                     `json:"end_time"`
 	Archived     bool                        `json:"archived"`
@@ -111,7 +113,7 @@ func NewGetRunInfoResponse(run *models.Run) *GetRunInfoResponse {
 				ID:   fmt.Sprintf("%d", *run.Experiment.ID),
 				Name: run.Experiment.Name,
 			},
-			Tags:         []string{},
+			Tags:         ConvertTagsToMaps(run.SharedTags),
 			CreationTime: float64(run.StartTime.Int64) / 1000,
 			EndTime:      float64(run.EndTime.Int64) / 1000,
 			Archived:     run.LifecycleStage == models.LifecycleStageDeleted,
@@ -171,7 +173,7 @@ type SearchAlignedMetricsResponse struct {
 	XAxisIters  fiber.Map `json:"x_axis_iters"`
 }
 
-// NewSearchAlignedMetricsResponse creates new response object for `GET /runs/search/metric/align` endpoint.
+// NewSearchAlignedMetricsResponse creates a new response object for `GET /runs/search/metric/align` endpoint.
 func NewSearchAlignedMetricsResponse(
 	ctx *fiber.Ctx, rows *sql.Rows, next func(*sql.Rows) (*models.AlignedMetric, error), capacity int,
 ) {
@@ -471,6 +473,117 @@ func NewStreamMetricsResponse(ctx *fiber.Ctx, rows *sql.Rows, totalRuns int64,
 	})
 }
 
+// NewStreamArtifactsResponse streams the provided sql.Rows to the fiber context.
+//
+//nolint:gocyclo
+func NewStreamArtifactsResponse(ctx *fiber.Ctx, rows *sql.Rows, totalRuns int64,
+	result repositories.ArtifactSearchSummary, req request.SearchArtifactsRequest,
+) {
+	ctx.Context().SetBodyStreamWriter(func(w *bufio.Writer) {
+		//nolint:errcheck
+		defer rows.Close()
+
+		start := time.Now()
+
+		if err := func() error {
+			var (
+				runID   string
+				runData fiber.Map
+				traces  []fiber.Map
+				cur     int64
+			)
+			reportProgress := func() error {
+				if !req.ReportProgress {
+					return nil
+				}
+				err := encoding.EncodeTree(w, fiber.Map{
+					fmt.Sprintf("progress_%d", cur): []int64{cur, totalRuns},
+				})
+				if err != nil {
+					return err
+				}
+				cur++
+				return w.Flush()
+			}
+			addImage := func(img models.Artifact) {
+				if runData == nil {
+					imagesPerStep := result.StepImageCount(img.RunID, 0)
+					runData = fiber.Map{
+						"ranges": fiber.Map{
+							"record_range_total": []int{0, result.TotalSteps(img.RunID)},
+							"record_range_used":  []int{0, int(img.Step)},
+							"index_range_total":  []int{0, imagesPerStep},
+							"index_range_used":   []int{0, int(img.Index)},
+						},
+						"params": fiber.Map{
+							"images_per_step": imagesPerStep,
+						},
+					}
+					traces = []fiber.Map{}
+				}
+				traces = append(traces, fiber.Map{
+					"blob_uri": img.BlobURI,
+					"caption":  img.Caption,
+					"height":   img.Height,
+					"width":    img.Width,
+					"format":   img.Format,
+					"iter":     img.Iter,
+					"index":    img.Index,
+					"step":     img.Step,
+				})
+			}
+			flushImages := func() error {
+				if runID == "" {
+					return nil
+				}
+				runData["traces"] = traces
+				if err := encoding.EncodeTree(w, fiber.Map{
+					runID: runData,
+				}); err != nil {
+					return err
+				}
+				if err := reportProgress(); err != nil {
+					return err
+				}
+				return w.Flush()
+			}
+			for rows.Next() {
+				var image models.Artifact
+				if err := database.DB.ScanRows(rows, &image); err != nil {
+					return err
+				}
+
+				// flush after each change in runID
+				// (assumes order by runID)
+				if image.RunID != runID {
+					if err := flushImages(); err != nil {
+						return err
+					}
+					runID = image.RunID
+					runData = nil
+					traces = nil
+				}
+				addImage(image)
+
+			}
+
+			if err := flushImages(); err != nil {
+				return err
+			}
+
+			if err := reportProgress(); err != nil {
+				return err
+			}
+
+			return nil
+		}(); err != nil {
+			log.Errorf("Error encountered in %s %s: error streaming images: %s", ctx.Method(), ctx.Path(), err)
+		}
+
+		log.Infof("body - %s %s %s", time.Since(start), ctx.Method(), ctx.Path())
+	})
+}
+
 // NewRunsSearchCSVResponse formats and sends Runs search response as a CSV file.
 //
 //nolint:gocyclo
@@ -637,7 +750,7 @@ func NewRunsSearchStreamResponse(
 							"id":   fmt.Sprintf("%d", *r.Experiment.ID),
 							"name": r.Experiment.Name,
 						},
-						"tags":          []string{}, // TODO insert real tags
+						"tags":          ConvertTagsToMaps(r.SharedTags),
 						"creation_time": float64(r.StartTime.Int64) / 1000,
 						"end_time":      float64(r.EndTime.Int64) / 1000,
 						"archived":      r.LifecycleStage == models.LifecycleStageDeleted,
@@ -732,6 +845,7 @@ func NewActiveRunsStreamResponse(ctx *fiber.Ctx, runs []models.Run, reportProgre
 		start := time.Now()
 		if err := func() error {
 			for i, r := range runs {
+
 				props := fiber.Map{
 					"name":        r.Name,
 					"description": nil,
@@ -739,7 +853,7 @@ func NewActiveRunsStreamResponse(ctx *fiber.Ctx, runs []models.Run, reportProgre
 						"id":   fmt.Sprintf("%d", *r.Experiment.ID),
 						"name": r.Experiment.Name,
 					},
-					"tags":          []string{},
+					"tags":          ConvertTagsToMaps(r.SharedTags),
 					"creation_time": float64(r.StartTime.Int64) / 1000,
 					"end_time":      float64(r.EndTime.Int64) / 1000,
 					"archived":      r.LifecycleStage == models.LifecycleStageDeleted,
