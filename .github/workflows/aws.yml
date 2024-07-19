@@ -3,12 +3,9 @@ name: AWS-Release
 on:
   push:
 
-permissions:
-  contents: read
 
 jobs:
   aws-release:
-    needs: docker-release
     runs-on: self-hosted
     steps:
       - name: Pull docker image
