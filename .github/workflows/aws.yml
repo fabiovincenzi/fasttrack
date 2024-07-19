@@ -7,7 +7,6 @@ permissions:
   contents: read
 
 jobs:
-
   aws-release:
     needs: docker-release
     runs-on: self-hosted
